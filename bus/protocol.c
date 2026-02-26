@@ -266,10 +266,10 @@ static int gip_get_actual_header_length(struct gip_header *hdr)
 	} while (pkt_len);
 
 	if (hdr->options & GIP_OPT_CHUNK) {
-		while (chunk_offset) {
+		do {
 			len++;
 			chunk_offset >>= 7;
-		}
+		} while (chunk_offset);
 	}
 
 	return len;

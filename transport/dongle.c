@@ -985,7 +985,10 @@ static void xone_dongle_complete_in(struct urb *urb)
 		usb_anchor_urb(urb, &dongle->urbs_in_idle);
 		return;
 	default:
-		goto resubmit;
+		dev_err(dongle->mt.dev, "%s: URB failed: %d\n",
+			__func__, urb->status);
+		usb_anchor_urb(urb, &dongle->urbs_in_idle);
+		return;
 	}
 
 	err = xone_dongle_process_buffer(dongle, urb->transfer_buffer,
@@ -994,7 +997,6 @@ static void xone_dongle_complete_in(struct urb *urb)
 		dev_err(dongle->mt.dev, "%s: process failed: %d\n",
 			__func__, err);
 
-resubmit:
 	/* can fail during USB device removal */
 	err = usb_submit_urb(urb, GFP_ATOMIC);
 	if (err) {

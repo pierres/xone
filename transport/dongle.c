@@ -1035,8 +1035,10 @@ static int xone_dongle_init_urbs_in(struct xone_dongle *dongle,
 
 		buf = usb_alloc_coherent(mt->udev, buf_len,
 					 GFP_KERNEL, &urb->transfer_dma);
-		if (!buf)
+		if (!buf) {
+			usb_unanchor_urb(urb);
 			return -ENOMEM;
+		}
 
 		usb_fill_bulk_urb(urb, mt->udev,
 				  usb_rcvbulkpipe(mt->udev, ep), buf, buf_len,
@@ -1044,8 +1046,12 @@ static int xone_dongle_init_urbs_in(struct xone_dongle *dongle,
 		urb->transfer_flags |= URB_NO_TRANSFER_DMA_MAP;
 
 		err = usb_submit_urb(urb, GFP_KERNEL);
-		if (err)
+		if (err) {
+			usb_free_coherent(mt->udev, buf_len, buf,
+					  urb->transfer_dma);
+			usb_unanchor_urb(urb);
 			return err;
+		}
 	}
 
 	return 0;

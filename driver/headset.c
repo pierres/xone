@@ -197,7 +197,12 @@ static bool gip_headset_copy_capture(struct gip_headset_stream *stream,
 {
 	unsigned char *dest = stream->substream->runtime->dma_area;
 	size_t buf_size = snd_pcm_lib_buffer_bytes(stream->substream);
-	size_t remaining = buf_size - stream->pointer;
+	size_t remaining;
+
+	if (len <= 0 || len > buf_size)
+		return false;
+
+	remaining = buf_size - stream->pointer;
 
 	if (len <= remaining) {
 		memcpy(dest + stream->pointer, data, len);

@@ -38,8 +38,12 @@ struct shash_desc *gip_auth_alloc_shash(const char *alg)
 
 int gip_auth_get_transcript(struct shash_desc *desc, void *transcript)
 {
-	void *state = kzalloc(crypto_shash_descsize(desc->tfm), GFP_KERNEL);
+	void *state;
 	int err;
+
+	state = kzalloc(crypto_shash_descsize(desc->tfm), GFP_KERNEL);
+	if (!state)
+		return -ENOMEM;
 
 	err = crypto_shash_export(desc, state);
 	if (err)

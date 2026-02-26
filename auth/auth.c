@@ -4,6 +4,7 @@
  */
 
 #include <linux/random.h>
+#include <crypto/algapi.h>
 #include <crypto/hash.h>
 
 #include "auth.h"
@@ -432,7 +433,7 @@ static int gip_auth_handle_pkt_finish(struct gip_auth *auth,
 		return err;
 	}
 
-	if (memcmp(pkt->transcript, finished, sizeof(finished))) {
+	if (crypto_memneq(pkt->transcript, finished, sizeof(finished))) {
 		dev_err(&auth->client->dev, "%s: transcript mismatch\n",
 			__func__);
 		return -EPROTO;
